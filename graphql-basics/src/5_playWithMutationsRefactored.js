@@ -1,0 +1,119 @@
+import { GraphQLServer } from 'graphql-yoga';
+import uuidv4 from 'uuid/v4';
+
+import db from './db';
+
+// Resolvers
+const resolvers = {
+    Query: {
+        users(parent, args, { db }, info) {
+            if (!args.query) {
+                return db.user;
+            }
+
+            return db.db.user.filter((user) => {
+                return user.name.toLocaleLowerCase().includes(args.query.toLocaleLowerCase());
+            })
+        },
+        posts(parent, args, { db }, info) {
+            if(!args.query) {
+                return db.post;
+            }
+
+            return db.post.filter((post) => {
+                const isTitleMatch = post.title.toLowerCase().includes(args.query.toLowerCase());
+                const isBodyMatch = post.body.toLowerCase().includes(args.query.toLowerCase());
+                return isTitleMatch || isBodyMatch;
+            });
+        }
+    },
+    Mutation: {
+        createUser(parent, args, { db }, info) {
+            const emailTaken = db.user.some((user) => user.email === args.data.email);
+            
+            if(emailTaken) {
+                throw new Error('Email taken.');
+            }
+
+            const user = {
+                id: uuidv4(),
+                ...args.data
+            };
+
+            db.user.push(user);
+            return user;
+        },
+        deleteUser(parent, args, { db }, info) {
+            const userIndex = db.user.findIndex((user) =>  user.id === args.id);
+
+            if (userIndex === -1) {
+                throw new Error('User not found');
+            }
+
+           const deletedUsers = db.user.splice(userIndex, 1);
+           
+           //TODO: Fix below logic dont mutate the array
+           const shouldDeletePosts = db.post.filter((post) => {
+                const match =  post.author === args.id;
+
+                return !match;
+           });
+
+           return deletedUsers[0];
+
+
+        },
+        createPost(parent, args, { db }, info) {
+            const usersExists = db.user.some((user) => user.id === args.data.author);
+
+            if(!usersExists) {
+                throw new Error('User not found');
+            }
+
+            const post = {
+                id: uuidv4(),
+                ...args.data
+            }
+
+            db.post.push(post);
+
+            return post;
+        },
+        deletePost(parent, args, { db }, info) {
+            const postIndex  = db.post.findIndex((post) => post.id === args.id);
+
+            if (postIndex === -1) {
+                throw new Error('Post not found');
+            }
+
+            const deletedPosts = posts.splice(postIndex, 1);
+
+            return deletedPosts[0];
+        }
+    },
+    //Nested Resolver method
+    Post: {
+        author(parent, args, { db }, info) {
+            return db.user.find((user) => user.id === parent.author);
+        }
+    },
+    User: {
+        posts(parent, args, { db }, info) {
+            return db.post.filter((post) => post.author === parent.id);
+        }
+    }
+}
+
+const server = new GraphQLServer({
+    typeDefs: './src/schema.graphql',
+    resolvers,
+    context: {
+        db
+    }
+});
+
+server.start(() => {
+    console.log('playWithMutations! server is up!');
+});
+
+
