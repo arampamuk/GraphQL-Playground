@@ -67,9 +67,7 @@ z
 
             const user = {
                 id: uuidv4(),
-                name: args.name,
-                email: args.email,
-                age: args.age
+                ...args
             };
 
             userDatas.push(user);
@@ -85,10 +83,7 @@ z
 
             const post = {
                 id: uuidv4(),
-                title: args.title,
-                body: args.body,
-                published: args.published,
-                author: args.author
+                ...args
             }
 
             postDatas.push(post);
