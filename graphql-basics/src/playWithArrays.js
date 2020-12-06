@@ -15,6 +15,7 @@ const typeDefs = `
         name: String!
         email: String!
         age: Int
+        posts: [Post!]!
     }
 
     type Post {
@@ -62,12 +63,19 @@ z
             });
         }
     },
-    //Resolver method
+    //Nested Resolver method
     Post: {
         author(parent, args, ctx, info) {
             return userDatas.find((user) => {
-                return user.id === parent.author
+                return user.id === parent.author;
             });
+        }
+    },
+    User: {
+        posts(parent, args, ctx, info) {
+            return postDatas.filter((post) => {
+                return post.author === parent.id;
+            })
         }
     }
 }
