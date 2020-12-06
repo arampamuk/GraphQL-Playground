@@ -1,5 +1,5 @@
 import { GraphQLServer } from 'graphql-yoga';
-import { postDatas, userDatas } from './staticDatas'
+import db  from './db';
 
 // Type definition (scheme)
 const typeDefs = `
@@ -44,19 +44,19 @@ const resolvers = {
         },
         users(parent, args, ctx, info) {
             if (!args.query) {
-                return userDatas;
+                return db.user;
             }
 z
-            return userDatas.filter((user) => {
+            return db.user.filter((user) => {
                 return user.name.toLocaleLowerCase().includes(args.query.toLocaleLowerCase());
             })
         },
         posts(parent, args, ctx, info) {
             if(!args.query) {
-                return postDatas;
+                return db.post;
             }
 
-            return postDatas.filter((post) => {
+            return db.post.filter((post) => {
                 const isTitleMatch = post.title.toLowerCase().includes(args.query.toLowerCase());
                 const isBodyMatch = post.body.toLowerCase().includes(args.query.toLowerCase());
                 return isTitleMatch || isBodyMatch;
@@ -66,14 +66,14 @@ z
     //Nested Resolver method
     Post: {
         author(parent, args, ctx, info) {
-            return userDatas.find((user) => {
+            return db.user.find((user) => {
                 return user.id === parent.author;
             });
         }
     },
     User: {
         posts(parent, args, ctx, info) {
-            return postDatas.filter((post) => {
+            return db.post.filter((post) => {
                 return post.author === parent.id;
             })
         }

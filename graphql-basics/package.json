@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon src/index.js --exec babel-node",
-    "customTypes": "nodemon src/customTypes.js --exec babel-node",
-    "playWithArrays": "nodemon src/playWithArrays.js --exec babel-node",
-    "playWithMutations": "nodemon src/playWithMutations.js --exec babel-node",
+    "start": "nodemon src/1_index.js --exec babel-node",
+    "customTypes": "nodemon src/2_customTypes.js --exec babel-node",
+    "playWithArrays": "nodemon src/3_playWithArrays.js --exec babel-node",
+    "playWithMutations": "nodemon src/4_playWithMutations.js --exec babel-node",
+    "playWithMutationsRefactored": "nodemon src/5_playWithMutationsRefactored.js --ext js,graphql --exec babel-node",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

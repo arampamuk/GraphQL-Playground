@@ -1,7 +1,7 @@
 import { GraphQLServer } from 'graphql-yoga';
 import uuidv4 from 'uuid/v4';
 
-import { postDatas, userDatas } from './staticDatas'
+import db  from './db'
 
 
 // Type definition (scheme)
@@ -53,19 +53,19 @@ const resolvers = {
     Query: {
         users(parent, args, ctx, info) {
             if (!args.query) {
-                return userDatas;
+                return db.user;
             }
 
-            return userDatas.filter((user) => {
+            return db.user.filter((user) => {
                 return user.name.toLocaleLowerCase().includes(args.query.toLocaleLowerCase());
             })
         },
         posts(parent, args, ctx, info) {
             if(!args.query) {
-                return postDatas;
+                return db.post;
             }
 
-            return postDatas.filter((post) => {
+            return db.post.filter((post) => {
                 const isTitleMatch = post.title.toLowerCase().includes(args.query.toLowerCase());
                 const isBodyMatch = post.body.toLowerCase().includes(args.query.toLowerCase());
                 return isTitleMatch || isBodyMatch;
@@ -74,7 +74,7 @@ const resolvers = {
     },
     Mutation: {
         createUser(parent, args, ctx, info) {
-            const emailTaken = userDatas.some((user) => user.email === args.data.email);
+            const emailTaken = db.user.some((user) => user.email === args.data.email);
             
             if(emailTaken) {
                 throw new Error('Email taken.');
@@ -85,23 +85,23 @@ const resolvers = {
                 ...args.data
             };
 
-            userDatas.push(user);
+            db.user.push(user);
             return user;
         },
         deleteUser(parent, args, ctx, info) {
-            const userIndex = userDatas.findIndex((user) =>  user.id === args.id);
+            const userIndex = db.user.findIndex((user) =>  user.id === args.id);
 
             if (userIndex === -1) {
                 throw new Error('User not found');
             }
 
-           const deletedUsers = userDatas.splice(userIndex, 1);
+           const deletedUsers = db.user.splice(userIndex, 1);
            
            //TODO: Fix below logic dont mutate the array
-           const aaapostDatas = postDatas.filter((post) => {
-                const match =  post.author === args.id;
+           const shouldDeletePosts = db.post.filter((post) => {
+                const match =  db.post.author === args.id;
 
-                return match;
+                return !match;
            });
 
            return deletedUsers[0];
@@ -109,7 +109,7 @@ const resolvers = {
 
         },
         createPost(parent, args, ctx, info) {
-            const usersExists = userDatas.some((user) => user.id === args.data.author);
+            const usersExists = db.user.some((user) => user.id === args.data.author);
 
             if(!usersExists) {
                 throw new Error('User not found');
@@ -120,12 +120,12 @@ const resolvers = {
                 ...args.data
             }
 
-            postDatas.push(post);
+            db.post.push(post);
 
             return post;
         },
         deletePost(parent, args, ctx, info) {
-            const postIndex  = postDatas.findIndex((post) => post.id === args.id);
+            const postIndex  = db.post.findIndex((post) => post.id === args.id);
 
             if (postIndex === -1) {
                 throw new Error('Post not found');
@@ -139,12 +139,12 @@ const resolvers = {
     //Nested Resolver method
     Post: {
         author(parent, args, ctx, info) {
-            return userDatas.find((user) => user.id === parent.author);
+            return db.user.find((user) => user.id === parent.author);
         }
     },
     User: {
         posts(parent, args, ctx, info) {
-            return postDatas.filter((post) => post.author === parent.id);
+            return db.post.filter((post) => post.author === parent.id);
         }
     }
 }

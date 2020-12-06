@@ -1,4 +1,4 @@
-let userDatas = [{
+const user = [{
     id: '1',
     name: 'Aram',
     email: 'Aram@test.com',
@@ -15,7 +15,7 @@ let userDatas = [{
     age: 55
 }];
 
-let postDatas = [{
+const post = [{
     id: '10',
     title: 'Lorem Ipsum is simply dummy text',
     body: 'printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy',
@@ -36,4 +36,9 @@ let postDatas = [{
 }
 ];
 
-export { postDatas, userDatas }
+const db = {
+    user,
+    post
+}
+
+export { db as default }
