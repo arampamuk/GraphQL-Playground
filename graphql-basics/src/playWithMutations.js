@@ -12,8 +12,22 @@ const typeDefs = `
     }
 
     type Mutation {
-        createUser(name: String!, email: String! age: Int): User!
-        createPost(title: String!, body: String!, published: Boolean!, author: ID!): Post!
+        createUser(data: CreateUserInput!): User!
+        deleteUser(id: ID!): User!
+        createPost(data: CreatePostInput!): Post!
+    }
+
+    input CreateUserInput {
+        name: String!
+        email: String! 
+        age: Int
+    }
+    
+    input CreatePostInput {
+        title: String!
+        body: String!
+        published: Boolean!
+        author: ID!
     }
 
     type User {
@@ -40,7 +54,7 @@ const resolvers = {
             if (!args.query) {
                 return userDatas;
             }
-z
+
             return userDatas.filter((user) => {
                 return user.name.toLocaleLowerCase().includes(args.query.toLocaleLowerCase());
             })
@@ -59,7 +73,7 @@ z
     },
     Mutation: {
         createUser(parent, args, ctx, info) {
-            const emailTaken = userDatas.some((user) => user.email === args.email);
+            const emailTaken = userDatas.some((user) => user.email === args.data.email);
             
             if(emailTaken) {
                 throw new Error('Email taken.');
@@ -67,15 +81,33 @@ z
 
             const user = {
                 id: uuidv4(),
-                ...args
+                ...args.data
             };
 
             userDatas.push(user);
-
             return user;
         },
+        deleteUser(parent, args, ctx, info) {
+            const userIndex = userDatas.findIndex((user) =>  user.id === args.id);
+
+            if (userIndex === -1) {
+                throw new Error('User not found');
+            }
+
+           const deletedUsers = userDatas.splice(userIndex, 1);
+           
+           postDatas = postDatas.filter((post) => {
+                const match =  post.author === args.id;
+
+                return !match;
+           });
+
+           return deletedUsers[0];
+
+
+        },
         createPost(parent, args, ctx, info) {
-            const usersExists = userDatas.some((user) => user.id === args.author);
+            const usersExists = userDatas.some((user) => user.id === args.data.author);
 
             if(!usersExists) {
                 throw new Error('User not found');
@@ -83,7 +115,7 @@ z
 
             const post = {
                 id: uuidv4(),
-                ...args
+                ...args.data
             }
 
             postDatas.push(post);
@@ -94,16 +126,12 @@ z
     //Nested Resolver method
     Post: {
         author(parent, args, ctx, info) {
-            return userDatas.find((user) => {
-                return user.id === parent.author;
-            });
+            return userDatas.find((user) => user.id === parent.author);
         }
     },
     User: {
         posts(parent, args, ctx, info) {
-            return postDatas.filter((post) => {
-                return post.author === parent.id;
-            })
+            return postDatas.filter((post) => post.author === parent.id);
         }
     }
 }
@@ -116,3 +144,5 @@ const server = new GraphQLServer({
 server.start(() => {
     console.log('playWithMutations! server is up!');
 });
+
+

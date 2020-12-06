@@ -1,4 +1,4 @@
-const userDatas = [{
+let userDatas = [{
     id: '1',
     name: 'Aram',
     email: 'Aram@test.com',
@@ -15,7 +15,7 @@ const userDatas = [{
     age: 55
 }];
 
-const postDatas = [{
+let postDatas = [{
     id: '10',
     title: 'Lorem Ipsum is simply dummy text',
     body: 'printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy',
