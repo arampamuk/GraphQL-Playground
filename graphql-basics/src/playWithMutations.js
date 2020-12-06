@@ -15,6 +15,7 @@ const typeDefs = `
         createUser(data: CreateUserInput!): User!
         deleteUser(id: ID!): User!
         createPost(data: CreatePostInput!): Post!
+        deletePost(id: ID!): Post!
     }
 
     input CreateUserInput {
@@ -96,10 +97,11 @@ const resolvers = {
 
            const deletedUsers = userDatas.splice(userIndex, 1);
            
-           postDatas = postDatas.filter((post) => {
+           //TODO: Fix below logic dont mutate the array
+           const aaapostDatas = postDatas.filter((post) => {
                 const match =  post.author === args.id;
 
-                return !match;
+                return match;
            });
 
            return deletedUsers[0];
@@ -121,6 +123,17 @@ const resolvers = {
             postDatas.push(post);
 
             return post;
+        },
+        deletePost(parent, args, ctx, info) {
+            const postIndex  = postDatas.findIndex((post) => post.id === args.id);
+
+            if (postIndex === -1) {
+                throw new Error('Post not found');
+            }
+
+            const deletedPosts = posts.splice(postIndex, 1);
+
+            return deletedPosts[0];
         }
     },
     //Nested Resolver method
