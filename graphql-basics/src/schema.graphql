@@ -42,6 +42,12 @@
         published: Boolean
     }
 
+    enum MutationType {
+        CREATED
+        UPDATED
+        DELETED
+    }
+
     type User {
         id: ID!
         name: String!
@@ -59,6 +65,6 @@
     }
 
     type PostSubscriptionPayload {
-        mutation: String!
+        mutation: MutationType!
         data: Post!
     }
