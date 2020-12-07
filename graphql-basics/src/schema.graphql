@@ -14,7 +14,8 @@
     }
 
     type Subscription {
-        post: Post!
+        count: Int!
+        post(userId: ID!): Post!
     }
 
     input CreateUserInput {

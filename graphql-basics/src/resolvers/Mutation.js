@@ -77,6 +77,7 @@ const Mutation = {
         }
 
         db.post.push(post);
+        pubsub.publish(`post ${args.data.author}`, { post });
 
         if (args.data.published) {
             pubsub.publish(`post`, { post });
