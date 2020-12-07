@@ -14,7 +14,7 @@
     }
 
     type Subscription {
-        post(userId: ID!): Post!
+        post: PostSubscriptionPayload!
     }
 
     input CreateUserInput {
@@ -56,4 +56,9 @@
         body: String!
         published: Boolean!
         author: User!
+    }
+
+    type PostSubscriptionPayload {
+        mutation: String!
+        data: Post!
     }
